@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>liveStatus Live Status — Summary (Futuristic)</title>
+
+    <!--
+    NOTE:
+    - This is a standalone HTML file for the SUMMARY section only.
+    - "Required references" below are minimal + common (fonts + icons).
+    - Kendo CSS is included as an optional reference to match your app styling.
+      If your enterprise build already bundles Kendo themes, you can remove it.
+  -->
+
+    <!-- Inter font (optional, modern UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Material Symbols (optional icons) -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200" />
+
+    <!-- OPTIONAL: Kendo theme (choose ONE). Uncomment the one you use in your app.
+       Defaulting to kendo-default for demo. -->
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/8.2.1/default/default-main.css" />
+
+    <style>
+        /* ---------- Page wrapper (demo only) ---------- */
+        :root {
+            color-scheme: light;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            background: #f3f6f9;
+            /* subtle banking app background */
+            color: #082033;
+            /* strong text color for legibility */
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        /* ---------- SUMMARY SECTION (CSS) ---------- */
+        .d-summary {
+            --panel: #ffffff;
+            --panel2: #f6f8fb;
+            --border: rgba(8, 32, 51, 0.12);
+            --text: #0b1f33;
+            --muted: rgba(11, 31, 51, 0.6);
+
+            --c-progress: #004c97;
+            /* crisp banking blue */
+            --c-running: #004c97;
+            --c-failed: #da1e28;
+            --c-completed: #198038;
+            --c-oldest: #6f7783;
+
+            background: linear-gradient(180deg, var(--panel), var(--panel2));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 16px 14px;
+            color: var(--text);
+            box-shadow:
+                0 8px 20px rgba(11, 37, 64, .06),
+                inset 0 1px 0 rgba(255, 255, 255, .9);
+            overflow: hidden;
+        }
+
+        /* top row */
+        .d-summary__top {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .d-summary__title {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            min-width: 260px;
+        }
+
+        .d-summary__appdot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(77, 163, 255, 1), rgba(57, 217, 138, 1));
+            box-shadow: 0 0 18px rgba(77, 163, 255, .7);
+            flex: 0 0 auto;
+        }
+
+        .d-summary__heading {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            line-height: 1.1;
+        }
+
+        .d-summary__sub {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .d-summary__pill {
+            font-size: 10px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 999px;
+            color: #ffffff;
+            background: #004c97;
+            border: 1px solid #004c97;
+        }
+
+        .d-summary__meta b {
+            color: rgba(255, 255, 255, .92);
+        }
+
+        /* controls */
+        .d-summary__controls {
+            display: flex;
+            align-items: end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .d-summary__label {
+            font-size: 11px;
+            color: var(--muted);
+            margin-right: -4px;
+            transform: translateY(-2px);
+        }
+
+        .d-summary__select {
+            appearance: none;
+            padding: 10px 36px 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .06));
+            color: var(--text);
+            outline: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+            cursor: pointer;
+        }
+
+        .d-summary__select:focus {
+            border-color: rgba(77, 163, 255, .55);
+            box-shadow: 0 0 0 3px rgba(77, 163, 255, .18), inset 0 1px 0 rgba(255, 255, 255, .08);
+        }
+
+        .d-summary__btn {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .d-summary__btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(8, 32, 51, 0.22);
+            box-shadow: 0 8px 18px rgba(11, 31, 51, .12), inset 0 1px 0 rgba(255, 255, 255, .7);
+        }
+
+        .d-summary__btn:active {
+            transform: translateY(0);
+        }
+
+        .d-summary__btn--ghost {
+            background: #f6f8fb;
+            border-color: var(--border);
+        }
+
+        .msr {
+            font-family: "Material Symbols Rounded";
+            font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 20;
+            font-size: 18px;
+            line-height: 1;
+            opacity: .9;
+        }
+
+        /* segmented status bar container */
+        .d-segbar {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 1100px) {
+            .d-segbar {
+                grid-template-columns: repeat(2, minmax(160px, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .d-segbar {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* segment */
+        .d-seg {
+            position: relative;
+            text-align: left;
+            border-radius: 14px;
+            padding: 12px 14px 12px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text);
+            cursor: pointer;
+            overflow: hidden;
+            min-height: 86px;
+            transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+            box-shadow:
+                0 6px 16px rgba(11, 31, 51, .10),
+                inset 0 1px 0 rgba(255, 255, 255, .7);
+        }
+
+        .d-seg:hover {
+            transform: translateY(-1px);
+            border-color: rgba(8, 32, 51, 0.22);
+            box-shadow:
+                0 12px 24px rgba(11, 31, 51, .14),
+                inset 0 1px 0 rgba(255, 255, 255, .7);
+        }
+
+        .d-seg__label {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .d-seg__icon {
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: #f6f8fb;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+        }
+
+        .d-seg__value {
+            margin-top: 10px;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            line-height: 1;
+        }
+
+        .d-seg__value--small {
+            font-size: 30px;
+        }
+
+        .d-seg__unit {
+            font-size: 14px;
+            color: var(--muted);
+            margin-left: 4px;
+        }
+
+        .d-seg__hint {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* sparkline dots */
+        .d-seg__spark {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 10px;
+            display: flex;
+            gap: 6px;
+            opacity: .55;
+        }
+
+        .d-seg__spark i {
+            height: 6px;
+            width: 6px;
+            border-radius: 999px;
+            background: rgba(11, 31, 51, .15);
+        }
+
+        .d-seg:hover .d-seg__spark {
+            opacity: .8;
+        }
+
+        /* glow overlay */
+        .d-seg__glow {
+            position: absolute;
+            inset: -2px;
+            opacity: 0;
+            transition: opacity .15s ease;
+            pointer-events: none;
+            background: none;
+        }
+
+        .d-seg:hover .d-seg__glow {
+            opacity: .9;
+        }
+
+        /* per-status accents */
+        .d-seg--progress {
+            --accent: var(--c-progress);
+        }
+
+        .d-seg--running {
+            --accent: var(--c-running);
+        }
+
+        .d-seg--failed {
+            --accent: var(--c-failed);
+        }
+
+        .d-seg--completed {
+            --accent: var(--c-completed);
+        }
+
+        .d-seg--oldest {
+            --accent: var(--c-oldest);
+        }
+
+        .d-seg::before {
+            content: none;
+        }
+
+        .d-seg::after {
+            content: none;
+        }
+
+        /* footer note */
+        .d-summary__foot {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .d-summary__note {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        /* small helper */
+        .kbd {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 7px;
+            border: 1px solid var(--border);
+            background: #f6f8fb;
+            color: var(--text);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- SUMMARY SECTION -->
+        <section class="d-summary" aria-label="liveStatus Live Status summary">
+            <div class="d-summary__top">
+                <div class="d-summary__title">
+                    <span class="d-summary__appdot" aria-hidden="true"></span>
+                    <div>
+                        <div class="d-summary__heading">liveStatus Live Status</div>
+                        <div class="d-summary__sub">
+                            <span class="d-summary__pill">LIVE</span>
+                            <span class="d-summary__meta">Last updated: <b id="lastUpdated">just now</b></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-summary__controls">
+                    <label class="d-summary__label" for="rangeSelect">Metrics window</label>
+                    <select id="rangeSelect" class="d-summary__select" aria-label="Metrics window">
+                        <option value="5">Last 5 mins</option>
+                        <option value="15" selected>Last 15 mins</option>
+                        <option value="60">Last 1 hour</option>
+                        <option value="today">Today</option>
+                        <option value="custom">Custom…</option>
+                    </select>
+
+                    <button class="d-summary__btn" type="button" id="refreshBtn" title="Refresh metrics (demo)">
+                        <span class="msr" aria-hidden="true">refresh</span>
+                        Refresh
+                    </button>
+                    <button class="d-summary__btn d-summary__btn--ghost" type="button" title="Settings (demo)">
+                        <span class="msr" aria-hidden="true">settings</span>
+                        Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Futuristic segmented status bar -->
+            <div class="d-segbar" role="group" aria-label="Status metrics">
+                <button class="d-seg d-seg--progress" type="button" aria-label="In Progress" data-status="InProgress">
+                    <div class="d-seg__label">
+                        <span class="d-seg__icon" aria-hidden="true"><span class="msr">autorenew</span></span>
+                        In Progress
+                    </div>
+                    <div class="d-seg__value" id="vInProgress">12</div>
+                    <div class="d-seg__spark" aria-hidden="true">
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                    <div class="d-seg__glow" aria-hidden="true"></div>
+                </button>
+
+                <button class="d-seg d-seg--running" type="button" aria-label="Running" data-status="Running">
+                    <div class="d-seg__label">
+                        <span class="d-seg__icon" aria-hidden="true"><span class="msr">play_arrow</span></span>
+                        Running
+                    </div>
+                    <div class="d-seg__value" id="vRunning">7</div>
+                    <div class="d-seg__spark" aria-hidden="true">
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                    <div class="d-seg__glow" aria-hidden="true"></div>
+                </button>
+
+                <button class="d-seg d-seg--failed" type="button" aria-label="Failed" data-status="Failed">
+                    <div class="d-seg__label">
+                        <span class="d-seg__icon" aria-hidden="true"><span class="msr">error</span></span>
+                        Failed
+                    </div>
+                    <div class="d-seg__value" id="vFailed">2</div>
+                    <div class="d-seg__spark" aria-hidden="true">
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                    <div class="d-seg__glow" aria-hidden="true"></div>
+                </button>
+
+                <button class="d-seg d-seg--completed" type="button" aria-label="Completed" data-status="Completed">
+                    <div class="d-seg__label">
+                        <span class="d-seg__icon" aria-hidden="true"><span class="msr">check_circle</span></span>
+                        Completed
+                    </div>
+                    <div class="d-seg__value" id="vCompleted">15</div>
+                    <div class="d-seg__spark" aria-hidden="true">
+                        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                    </div>
+                    <div class="d-seg__glow" aria-hidden="true"></div>
+                </button>
+
+                <button class="d-seg d-seg--oldest" type="button" aria-label="Oldest Pending"
+                    data-status="OldestPending">
+                    <div class="d-seg__label">
+                        <span class="d-seg__icon" aria-hidden="true"><span class="msr">schedule</span></span>
+                        Oldest Pending
+                    </div>
+                    <div class="d-seg__value">
+                        <span class="d-seg__value--small" id="vOldest">15</span><span class="d-seg__unit">m</span>
+                    </div>
+                    <div class="d-seg__hint">real-time</div>
+                    <div class="d-seg__glow" aria-hidden="true"></div>
+                </button>
+            </div>
+
+            <div class="d-summary__foot">
+                <span class="d-summary__note">
+                    Metrics show activity in the selected window (counts by status). “Oldest Pending” is always
+                    real-time.
+                    Tip: click a segment to apply a status filter in the grid. <span class="kbd">demo: logs in
+                        console</span>
+                </span>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Demo-only JS: simulates refreshing + shows how you'd wire clicks to your grid filtering.
+        const lastUpdatedEl = document.getElementById("lastUpdated");
+        const rangeSelect = document.getElementById("rangeSelect");
+        const refreshBtn = document.getElementById("refreshBtn");
+
+        const elInProgress = document.getElementById("vInProgress");
+        const elRunning = document.getElementById("vRunning");
+        const elFailed = document.getElementById("vFailed");
+        const elCompleted = document.getElementById("vCompleted");
+        const elOldest = document.getElementById("vOldest");
+
+        function nowLabel() {
+            const d = new Date();
+            return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        }
+
+        function randAround(base, spread) {
+            const v = base + Math.floor((Math.random() * (spread * 2 + 1)) - spread);
+            return Math.max(0, v);
+        }
+
+        function refreshMetrics() {
+            // Replace this with your real API call.
+            elInProgress.textContent = randAround(12, 3);
+            elRunning.textContent = randAround(7, 2);
+            elFailed.textContent = randAround(2, 1);
+            elCompleted.textContent = randAround(15, 4);
+
+            // Oldest pending is "real-time", keep it stable-ish
+            elOldest.textContent = randAround(15, 3);
+
+            lastUpdatedEl.textContent = nowLabel();
+            console.log("[demo] refresh metrics | window =", rangeSelect.value);
+        }
+
+        refreshBtn.addEventListener("click", refreshMetrics);
+
+        // Click any segment to "apply filter"
+        document.querySelectorAll(".d-seg").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const status = btn.getAttribute("data-status");
+                console.log("[demo] apply grid filter:", status);
+                // In Angular/Kendo you’d call your filter method here.
+            });
+        });
+
+        rangeSelect.addEventListener("change", () => {
+            console.log("[demo] metrics window changed:", rangeSelect.value);
+            refreshMetrics();
+        });
+
+        // Initial
+        refreshMetrics();
+    </script>
+</body>
+
+</html>
