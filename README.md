@@ -1,62 +1,125 @@
-/* ===== SUMMARY BLOCKS: BOFA-LIKE (NO COLOR PANELS) ===== */
+public isSummaryCollapsed = false;
 
-/* base segment: clean white, square, subtle divider only */
-.dca24-seg{
-  background: #ffffff !important;
-  border-right: 1px solid #c9d6e6;
-  border-radius: 0;
-  box-shadow: none;
+toggleSummary() {
+  this.isSummaryCollapsed = !this.isSummaryCollapsed;
 }
 
-/* remove any previous gradient/panel effect */
-.dca24-seg:before,
-.dca24-seg:after{
-  display:none !important;
+
+/* ===== Collapsible Wrapper ===== */
+.dca24-wrap {
+  border-bottom: 1px solid #c9d6e6;
 }
 
-/* top accent line — only place where color shows */
-.seg-completed{ border-top: 3px solid #1f4f9b; }  /* deep bank blue */
-.seg-pending  { border-top: 3px solid #2a5fae; }  /* slightly lighter */
-.seg-current  { border-top: 3px solid #0b1f3a; }  /* navy (most important) */
-.seg-last     { border-top: 3px solid #6b7f9a; }  /* steel */
+/* Header */
+.dca24-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+  padding: 8px 0;
+  user-select:none;
+}
 
-/* headings + numbers: bank navy */
-.dca24-label{ color:#0b1f3a; }
-.dca24-num{ color:#0b1f3a; }
-.dca24-txn{ color:#0b1f3a; }
-
-/* icons: no colored fill, only colored stroke/text */
-.dca24-icon{
-  background:#ffffff;
-  border:1px solid #c9d6e6;
+.dca24-title {
+  font-size: 13px;
+  font-weight: 800;
   color:#0b1f3a;
-  border-radius:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
-/* optional: set per block icon color (subtle) */
-.seg-completed .dca24-icon{ color:#1f4f9b; }
-.seg-pending   .dca24-icon{ color:#2a5fae; }
-.seg-current   .dca24-icon{ color:#0b1f3a; }
-.seg-last      .dca24-icon{ color:#6b7f9a; }
-
-/* dots: neutral by default; only executing gets darker */
-.dca24-dots span{
-  background:#c4d3e6;
-  border-radius:0;
-}
-.seg-current .dca24-dots span{
-  background:#8aa7d6;
+/* Chevron */
+.chevron {
+  font-size: 12px;
+  transition: transform .2s ease;
 }
 
-/* subtle “live” mark for executing — NOT glowing, just a small square */
-.seg-current::before{
-  content:'';
-  position:absolute;
-  top:8px;
-  right:10px;
-  width:6px;
-  height:6px;
-  background:#0b1f3a;
-  opacity:.75;
-  border-radius:0;
+.chevron.rotate {
+  transform: rotate(90deg);
 }
+
+/* Collapsible Body */
+.dca24-body {
+  overflow: hidden;
+  transition: max-height .25s ease, opacity .2s ease;
+  max-height: 200px;
+  opacity: 1;
+}
+
+/* Collapsed state */
+.dca24-wrap.collapsed .dca24-body {
+  max-height: 0;
+  opacity: 0;
+}
+
+
+
+
+<div class="dca24-wrap" [class.collapsed]="isSummaryCollapsed">
+
+  <!-- Header / Toggle Bar -->
+  <div class="dca24-header" (click)="toggleSummary()">
+    <div class="dca24-title">
+      <span class="chevron" [class.rotate]="!isSummaryCollapsed">▸</span>
+      24 Hour Transaction Summary
+    </div>
+
+    <div class="dca24-meta">
+      <span>Last updated: just now</span>
+    </div>
+  </div>
+
+  <!-- Collapsible Body -->
+  <div class="dca24-body">
+    <div class="dca24-bar">
+
+      <!-- Completed -->
+      <div class="dca24-seg seg-completed">
+        <div class="dca24-seg-head">
+          <span class="dca24-icon">✔</span>
+          <span class="dca24-label">Completed (24h)</span>
+        </div>
+        <div class="dca24-value">
+          <span class="dca24-num">152</span>
+        </div>
+      </div>
+
+      <!-- Pending -->
+      <div class="dca24-seg seg-pending">
+        <div class="dca24-seg-head">
+          <span class="dca24-icon">⏳</span>
+          <span class="dca24-label">Pending (24h)</span>
+        </div>
+        <div class="dca24-value">
+          <span class="dca24-num">27</span>
+        </div>
+      </div>
+
+      <!-- Currently Executing -->
+      <div class="dca24-seg seg-current">
+        <div class="dca24-seg-head">
+          <span class="dca24-icon">▶</span>
+          <span class="dca24-label">Currently Executing</span>
+        </div>
+        <div class="dca24-subline">Transaction #</div>
+        <div class="dca24-value">
+          <span class="dca24-txn">202511114171</span>
+        </div>
+      </div>
+
+      <!-- Last Executed -->
+      <div class="dca24-seg seg-last">
+        <div class="dca24-seg-head">
+          <span class="dca24-icon">↺</span>
+          <span class="dca24-label">Last Executed</span>
+        </div>
+        <div class="dca24-subline">Transaction #</div>
+        <div class="dca24-value">
+          <span class="dca24-txn">202511115115</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
