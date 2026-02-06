@@ -1,173 +1,135 @@
-<ng-template kendoGridToolbarTemplate>
-  <div class="dca-toolbar">
-
-    <!-- Left: Search -->
-    <div class="dca-toolbar-left">
-      <span class="dca-search">
-        <span class="k-icon k-i-search dca-search-icon"></span>
-        <kendo-textbox
-          class="dca-search-input"
-          [value]="toolbar.search"
-          (valueChange)="onToolbarSearch($event)"
-          placeholder="Search transactions, users,, templates, email..."
-        >
-        </kendo-textbox>
-      </span>
-
-      <!-- Status chips -->
-      <button
-        type="button"
-        class="dca-chip dca-chip-failed"
-        [class.is-active]="toolbar.status === 'failed'"
-        (click)="toggleStatus('failed')"
-      >
-        <span class="k-icon k-i-warning"></span>
-        Failed
-      </button>
-
-      <button
-        type="button"
-        class="dca-chip dca-chip-progress"
-        [class.is-active]="toolbar.status === 'inprogress'"
-        (click)="toggleStatus('inprogress')"
-      >
-        In Progress <span class="dca-chip-count">{{ summary?.inProgress || 0 }}</span>
-      </button>
-
-      <!-- UI / API segmented -->
-      <div class="dca-seg">
-        <button
-          type="button"
-          class="dca-seg-btn"
-          [class.is-active]="toolbar.source === 'ui'"
-          (click)="setSource('ui')"
-        >
-          UI
-        </button>
-        <button
-          type="button"
-          class="dca-seg-btn"
-          [class.is-active]="toolbar.source === 'api'"
-          (click)="setSource('api')"
-        >
-          API
-        </button>
-      </div>
-    </div>
-
-    <!-- Right: actions -->
-    <div class="dca-toolbar-right">
-      <div class="dca-switch">
-        <kendo-switch
-          [checked]="autoRefreshEnabled"
-          (valueChange)="setAutoRefresh($event)"
-        ></kendo-switch>
-        <span class="dca-switch-label">Auto-refresh</span>
-      </div>
-
-      <!-- Columns dropdown (wire it later if you already have your own impl) -->
-      <button type="button" class="dca-btn dca-btn-ghost" (click)="openColumns()">
-        Columns <span class="k-icon k-i-arrow-s"></span>
-      </button>
-
-      <button type="button" class="dca-btn dca-btn-ghost" (click)="clearToolbar()">
-        Clear
-      </button>
-    </div>
-  </div>
-</ng-template>
-
-// Toolbar state
-public toolbar = {
-  search: '',
-  status: null as null | 'failed' | 'inprogress',
-  source: null as null | 'ui' | 'api'
-};
-
-// If your dataset array is named differently, update here:
-private get rows(): any[] {
-  return this.lstDCATransactionLiveStatus || [];
+/* Toolbar shell */
+.dca-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 10px;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:8px;
+  background: linear-gradient(180deg, #fafafa, #f5f6f8);
 }
 
-public onToolbarSearch(value: string): void {
-  this.toolbar.search = value || '';
-  this.applyToolbarFilters();
+.dca-toolbar-left, .dca-toolbar-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
-public toggleStatus(kind: 'failed' | 'inprogress'): void {
-  this.toolbar.status = (this.toolbar.status === kind) ? null : kind;
-  this.applyToolbarFilters();
+/* Search */
+.dca-search{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  min-width:420px;
+}
+.dca-search-icon{
+  opacity:.7;
+}
+.dca-search-input{
+  width:100%;
+}
+.dca-search .k-input-inner{
+  border:none !important;
+  box-shadow:none !important;
 }
 
-public setSource(src: 'ui' | 'api'): void {
-  this.toolbar.source = (this.toolbar.source === src) ? null : src;
-  this.applyToolbarFilters();
+/* Chips */
+.dca-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  height:34px;
+  padding:0 12px;
+  border-radius:8px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+.dca-chip:hover{ filter:brightness(.99); box-shadow:0 6px 12px rgba(0,0,0,.06); }
+.dca-chip.is-active{
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.08);
 }
 
-public clearToolbar(): void {
-  this.toolbar = { search: '', status: null, source: null };
-  this.applyToolbarFilters(true);
+/* Failed */
+.dca-chip-failed{
+  background: linear-gradient(180deg, #ffffff, #f7f7f7);
+}
+.dca-chip-failed.is-active{
+  border-color: rgba(220,38,38,.35);
+  background: linear-gradient(180deg, rgba(220,38,38,.10), rgba(220,38,38,.04));
 }
 
-/** Placeholder for your columns menu */
-public openColumns(): void {
-  // If you already have a Kendo ColumnChooser or custom dialog, open it here.
-  // e.g. this.showColumnsDialog = true;
+/* In progress */
+.dca-chip-progress.is-active{
+  border-color: rgba(59,130,246,.35);
+  background: linear-gradient(180deg, rgba(59,130,246,.12), rgba(59,130,246,.05));
 }
 
-/** Build ONE composite filter that matches the toolbar UI */
-private applyToolbarFilters(clearAll = false): void {
-  // keep existing filters if you want; OR reset everything when clearAll
-  const filters: any[] = [];
-
-  if (!clearAll) {
-    const q = (this.toolbar.search || '').trim();
-    if (q) {
-      filters.push({
-        logic: 'or',
-        filters: [
-          { field: 'TransactionNumber', operator: 'contains', value: q },
-          { field: 'CurrentStatus', operator: 'contains', value: q },
-          { field: 'DebitCardNumber', operator: 'contains', value: q },
-          { field: 'Pipeline', operator: 'contains', value: q },
-          { field: 'Issuer', operator: 'contains', value: q },
-          { field: 'TemplateName', operator: 'contains', value: q },
-          { field: 'EmailAddress', operator: 'contains', value: q },
-          { field: 'UserID', operator: 'contains', value: q },
-          { field: 'IsFrom', operator: 'contains', value: q }
-        ]
-      });
-    }
-
-    if (this.toolbar.status === 'failed') {
-      filters.push({ field: 'CurrentStatus', operator: 'contains', value: 'Fail' });
-    } else if (this.toolbar.status === 'inprogress') {
-      filters.push({ field: 'CurrentStatus', operator: 'contains', value: 'Progress' });
-    }
-
-    if (this.toolbar.source === 'ui') {
-      filters.push({ field: 'IsFrom', operator: 'eq', value: 'UI' });
-    } else if (this.toolbar.source === 'api') {
-      filters.push({ field: 'IsFrom', operator: 'eq', value: 'API' });
-    }
-  }
-
-  const newFilter: CompositeFilterDescriptor = {
-    logic: 'and',
-    filters
-  };
-
-  this.state = {
-    ...this.state,
-    skip: 0,
-    filter: newFilter
-  };
-
-  // Rebind
-  this.gridView = process(this.rows, this.state);
+.dca-chip-count{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:22px;
+  height:18px;
+  padding:0 6px;
+  border-radius:999px;
+  font-size:12px;
+  background: rgba(0,0,0,.08);
 }
 
+/* Segmented UI/API */
+.dca-seg{
+  display:inline-flex;
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:8px;
+  overflow:hidden;
+  background:#fff;
+}
+.dca-seg-btn{
+  height:34px;
+  padding:0 14px;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  font-weight:700;
+}
+.dca-seg-btn.is-active{
+  background: rgba(0,0,0,.08);
+}
 
+/* Switch + label */
+.dca-switch{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 6px;
+}
+.dca-switch-label{
+  font-size:13px;
+  font-weight:600;
+  color:#374151;
+}
 
+/* Buttons */
+.dca-btn{
+  height:34px;
+  padding:0 12px;
+  border-radius:8px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+.dca-btn-ghost:hover{ box-shadow:0 6px 12px rgba(0,0,0,.06); }
 
-
+/* Make it responsive */
+@media (max-width: 1100px){
+  .dca-search{ min-width: 260px; }
+}
